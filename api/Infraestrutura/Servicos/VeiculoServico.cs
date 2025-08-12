@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using lista_veiculos.Dominio.Entidades;
+using lista_veiculos.Dominio.interfaces;
 using lista_veiculos.Infraestrutura.Db;
 
 namespace lista_veiculos.Infraestrutura.Servicos
 {
-    public class VeiculoServico
+    public class VeiculoServico : IVeiculoServico
     {
         private readonly DbContexto _contexto;
 
@@ -16,7 +17,7 @@ namespace lista_veiculos.Infraestrutura.Servicos
             _contexto = db;
         }
 
-        public List<Veiculo> Todos(int pagina = 1, string? nome = null, string? marca = null)
+        public List<Veiculo> Todos(int? pagina = 1, string? nome = null, string? marca = null)
         {
             var query = _contexto.Veiculos.AsQueryable();
 
@@ -30,7 +31,7 @@ namespace lista_veiculos.Infraestrutura.Servicos
                 query = query.Where(v => v.Marca.Contains(marca));
             }
 
-            return query.Skip((pagina - 1) * 10).Take(10).ToList();
+            return query.Skip(((pagina ?? 1) - 1) * 10).Take(10).ToList();
         }
 
         public Veiculo BuscaPorId(int id)
