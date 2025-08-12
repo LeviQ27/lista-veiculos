@@ -1,5 +1,6 @@
 using lista_veiculos.Dominio.DTOs;
 using lista_veiculos.Dominio.interfaces;
+using lista_veiculos.Dominio.ModelViews;
 using lista_veiculos.Infraestrutura.Db;
 using lista_veiculos.Infraestrutura.Servicos;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +25,7 @@ builder.Services.AddDbContext<DbContexto>(options =>
 var app = builder.Build();
 
 
-app.MapGet("/", () => "Hello World!");
+app.MapGet("/", () => Results.Json(new Home()));
 
 app.MapPost("/login", ([FromBody] LoginDTO loginDto, IAdministradorServico administradorServico) =>
 {
