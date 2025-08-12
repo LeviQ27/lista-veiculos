@@ -16,11 +16,31 @@ namespace lista_veiculos.Infraestrutura.Servicos
         {
             _contexto = db;
         }
+
+        public Administrador Adicionar(Administrador administrador)
+        {
+            _contexto.Administradores.Add(administrador);
+            _contexto.SaveChanges();
+            return administrador;
+        }
+
+        public Administrador? BuscaPorId(int id)
+        {
+            return _contexto.Administradores.Where(a => a.Id == id).FirstOrDefault();
+        }
+
         public Administrador? Login(LoginDTO loginDTO)
         {
             // Implementar lógica de autenticação
             return _contexto.Administradores
                 .Where(a => a.Email == loginDTO.Email && a.Senha == loginDTO.Senha).FirstOrDefault();
+        }
+
+        public List<Administrador> Todos(int? pagina = 1)
+        {
+            var query = _contexto.Administradores.AsQueryable();
+
+            return query.Skip(((pagina ?? 1) - 1) * 10).Take(10).ToList();
         }
     }
 }

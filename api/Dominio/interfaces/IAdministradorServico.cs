@@ -10,5 +10,8 @@ namespace lista_veiculos.Dominio.interfaces
     public interface IAdministradorServico
     {
         Administrador? Login(LoginDTO loginDTO);
+        Administrador Adicionar(Administrador administrador);
+        List<Administrador> Todos(int? pagina = 1);
+        Administrador? BuscaPorId(int id);
     }
 }

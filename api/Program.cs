@@ -1,5 +1,6 @@
 using lista_veiculos.Dominio.DTOs;
 using lista_veiculos.Dominio.Entidades;
+using lista_veiculos.Dominio.Enums;
 using lista_veiculos.Dominio.interfaces;
 using lista_veiculos.Dominio.ModelViews;
 using lista_veiculos.Infraestrutura.Db;
@@ -42,6 +43,81 @@ app.MapPost("/administradores/login", ([FromBody] LoginDTO loginDto, IAdministra
     else
     {
         return Results.Unauthorized();
+    }
+}).WithTags("Administradores");
+
+app.MapPost("/administradores", ([FromBody] AdministradorDTO administradorDto, IAdministradorServico administradorServico) =>
+{
+    var validacao = new ErrosDeValidacao();
+    if (string.IsNullOrEmpty(administradorDto.Email))
+    {
+        validacao.Mensagens.Add("O email é obrigatório.");
+    }
+    if (string.IsNullOrEmpty(administradorDto.Senha))
+    {
+        validacao.Mensagens.Add("A senha é obrigatória.");
+    }
+    if (administradorDto.Perfil == null)
+    {
+        validacao.Mensagens.Add("O perfil é obrigatório.");
+    }
+
+    if (validacao.Mensagens.Count > 0)
+    {
+        return Results.BadRequest(validacao);
+    }
+
+    var administrador = new Administrador
+    {
+        Email = administradorDto.Email,
+        Senha = administradorDto.Senha,
+        Perfil = administradorDto.Perfil?.ToString() ?? Perfil.Editor.ToString()
+    };
+
+    administradorServico.Adicionar(administrador);
+    return Results.Created($"/administradores/{administrador.Id}", administrador);
+
+}).WithTags("Administradores");
+
+app.MapGet("/administradores", ([FromQuery] int? pagina, IAdministradorServico administradorServico) =>
+{
+    try
+    {
+        var adms = new List<AdministradorModelView>();
+        var administradores = administradorServico.Todos(pagina);
+        foreach (var adm in administradores)
+        {
+            adms.Add(new AdministradorModelView
+            {
+                Id = adm.Id,
+                Email = adm.Email,
+                Perfil = adm.Perfil.ToString()
+            });
+        }
+        return Results.Ok(adms);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Erro ao buscar administradores: {ex.Message}");
+    }
+}).WithTags("Administradores");
+
+app.MapGet("/administradores/{id:int}", ([FromRoute] int id, IAdministradorServico administradorServico) =>
+{
+    try
+    {
+        var administrador = administradorServico.BuscaPorId(id);
+        var adm = new AdministradorModelView
+        {
+            Id = administrador!.Id,
+            Email = administrador.Email,
+            Perfil = administrador.Perfil.ToString()
+        };
+        return Results.Ok(adm);
+    }
+    catch (KeyNotFoundException)
+    {
+        return Results.NotFound("Administrador não encontrado.");
     }
 }).WithTags("Administradores");
 #endregion
