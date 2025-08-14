@@ -9,6 +9,7 @@ using lista_veiculos.Dominio.ModelViews;
 using lista_veiculos.Infraestrutura.Db;
 using lista_veiculos.Infraestrutura.Servicos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -91,7 +92,8 @@ string GerarTokenJwt(Administrador administrador)
     var claims = new List<Claim>
     {
         new Claim("Email", administrador.Email),
-        new Claim("Perfil", administrador.Perfil.ToString())
+        new Claim("Perfil", administrador.Perfil.ToString()),
+        new Claim(ClaimTypes.Role, administrador.Perfil)
     };
     var tokenDescriptor = new SecurityTokenDescriptor
     {
@@ -153,7 +155,7 @@ app.MapPost("/administradores", ([FromBody] AdministradorDTO administradorDto, I
     administradorServico.Adicionar(administrador);
     return Results.Created($"/administradores/{administrador.Id}", administrador);
 
-}).RequireAuthorization().WithTags("Administradores");
+}).RequireAuthorization().RequireAuthorization(new AuthorizeAttribute{ Roles = "Adm" }).WithTags("Administradores");
 
 app.MapGet("/administradores", ([FromQuery] int? pagina, IAdministradorServico administradorServico) =>
 {
@@ -176,7 +178,7 @@ app.MapGet("/administradores", ([FromQuery] int? pagina, IAdministradorServico a
     {
         return Results.Problem($"Erro ao buscar administradores: {ex.Message}");
     }
-}).RequireAuthorization().WithTags("Administradores");
+}).RequireAuthorization().RequireAuthorization(new AuthorizeAttribute{ Roles = "Adm" }).WithTags("Administradores");
 
 app.MapGet("/administradores/{id:int}", ([FromRoute] int id, IAdministradorServico administradorServico) =>
 {
@@ -195,7 +197,7 @@ app.MapGet("/administradores/{id:int}", ([FromRoute] int id, IAdministradorServi
     {
         return Results.NotFound("Administrador não encontrado.");
     }
-}).RequireAuthorization().WithTags("Administradores");
+}).RequireAuthorization().RequireAuthorization(new AuthorizeAttribute{ Roles = "Adm" }).WithTags("Administradores");
 #endregion
 
 #region Veículos
@@ -235,7 +237,7 @@ app.MapPost("/veiculos", ([FromBody] VeiculoDTO veiculoDto, IVeiculoServico veic
     veiculoServico.Adicionar(veiculo);
     return Results.Created($"/veiculos/{veiculo.Id}", veiculo);
 
-}).RequireAuthorization().WithTags("Veículos");
+}).RequireAuthorization().RequireAuthorization(new AuthorizeAttribute{ Roles = "Adm,Editor" }).WithTags("Veículos");
 
 app.MapGet("/veiculos", ([FromQuery] int? pagina, IVeiculoServico veiculoServico) =>
 {
@@ -248,7 +250,7 @@ app.MapGet("/veiculos", ([FromQuery] int? pagina, IVeiculoServico veiculoServico
     {
         return Results.Problem($"Erro ao buscar veículos: {ex.Message}");
     }
-}).RequireAuthorization().WithTags("Veículos");
+}).RequireAuthorization().RequireAuthorization(new AuthorizeAttribute{ Roles = "Adm,Editor" }).WithTags("Veículos");
 
 app.MapGet("/veiculos/{id:int}", ([FromRoute] int id, IVeiculoServico veiculoServico) =>
 {
@@ -261,7 +263,7 @@ app.MapGet("/veiculos/{id:int}", ([FromRoute] int id, IVeiculoServico veiculoSer
     {
         return Results.NotFound("Veículo não encontrado.");
     }
-}).WithTags("Veículos");
+}).RequireAuthorization().RequireAuthorization(new AuthorizeAttribute{ Roles = "Adm,Editor" }).WithTags("Veículos");
 
 app.MapPut("/veiculos/{id:int}", ([FromRoute] int id, [FromBody] VeiculoDTO veiculoDto, IVeiculoServico veiculoServico) =>
 {
@@ -283,7 +285,7 @@ app.MapPut("/veiculos/{id:int}", ([FromRoute] int id, [FromBody] VeiculoDTO veic
     {
         return Results.NotFound("Veículo não encontrado.");
     }
-}).RequireAuthorization().WithTags("Veículos");
+}).RequireAuthorization().RequireAuthorization(new AuthorizeAttribute{ Roles = "Adm" }).WithTags("Veículos");
 
 app.MapDelete("/veiculos/{id:int}", ([FromRoute] int id, IVeiculoServico veiculoServico) =>
 {
@@ -297,7 +299,7 @@ app.MapDelete("/veiculos/{id:int}", ([FromRoute] int id, IVeiculoServico veiculo
     {
         return Results.NotFound("Veículo não encontrado.");
     }
-}).RequireAuthorization().WithTags("Veículos");
+}).RequireAuthorization().RequireAuthorization(new AuthorizeAttribute{ Roles = "Adm" }).WithTags("Veículos");
 #endregion
 
 #region App
