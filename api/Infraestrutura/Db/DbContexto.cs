@@ -38,7 +38,7 @@ namespace lista_veiculos.Infraestrutura.Db
         {
             if (!optionsBuilder.IsConfigured)
             {
-                var stringDeConexao = _configurationAppSettings.GetConnectionString("mysql")?.ToString();
+                var stringDeConexao = _configurationAppSettings.GetConnectionString("MySql")?.ToString();
                 if (!string.IsNullOrEmpty(stringDeConexao))
                 {
                     optionsBuilder.UseMySql(stringDeConexao, ServerVersion.AutoDetect(stringDeConexao));
