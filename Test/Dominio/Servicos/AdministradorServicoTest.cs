@@ -50,7 +50,19 @@ namespace Test.Dominio.Servicos
         [TestMethod]
         public void TestandoBuscarPorId()
         {
-            Assert.IsTrue(true);
+            //Arrange
+            var context = CriarContextoDeTeste();
+            context.Database.ExecuteSqlRaw("TRUNCATE TABLE Administradores");
+
+            var adm = new Administrador { Email = "admin@test.com", Senha = "Senha123", Perfil = "Adm" };
+            var administradoresServico = new AdministradorServico(context);
+
+            //Act
+            administradoresServico.Adicionar(adm);
+            var resultado = administradoresServico.BuscaPorId(adm.Id);
+
+            //Assert
+            Assert.AreEqual(1, resultado?.Id);
         }
     }
 }
